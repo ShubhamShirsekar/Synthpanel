@@ -17,6 +17,29 @@ from openai import AzureOpenAI
 
 load_dotenv(Path(__file__).parent.parent / ".env", override=True)
 
+
+def get_setting(name, default=None, required=False):
+    """Resolve config from environment first, then Streamlit secrets."""
+    val = os.getenv(name)
+    if val:
+        return val
+
+    try:
+        if name in st.secrets:
+            secret_val = str(st.secrets[name]).strip()
+            if secret_val:
+                # Keep values available to existing os.environ usage.
+                os.environ[name] = secret_val
+                return secret_val
+    except Exception:
+        # st.secrets can be unavailable in some local contexts.
+        pass
+
+    if required and default is None:
+        raise RuntimeError(f"Missing required setting: {name}")
+
+    return default
+
 # ──────────────────────────────────────────────────────────
 # INE static lookup — representative median monthly income
 # by age bracket × region (EUR/month, 2023 estimates)
@@ -156,7 +179,7 @@ input { background-color: #1a1a1a !important; color: #f0f0f0 !important; }
 # ──────────────────────────────────────────────────────────
 PERSONAS_DIR = Path(__file__).parent / "output" / "personas"
 PROFILES_PATH = Path(__file__).parent / "output" / "cluster_profiles.json"
-DASHBOARD_HEATMAP = Path(__file__).parent.parent / "dashboards" / "synthpanel_heatmap.html"
+DASHBOARD_HEATMAP = Path(__file__).parent / "dashboards" / "synthpanel_heatmap.html"
 
 
 @st.cache_data
@@ -196,22 +219,25 @@ for pname, pinfo in PERSONAS.items():
 # ──────────────────────────────────────────────────────────
 def get_client():
     return AzureOpenAI(
-        azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
-        api_key=os.environ["AZURE_OPENAI_API_KEY"],
-        api_version=os.environ.get("AZURE_OPENAI_API_VERSION", "2025-01-01-preview"),
+        azure_endpoint=get_setting("AZURE_OPENAI_ENDPOINT", required=True),
+        api_key=get_setting("AZURE_OPENAI_API_KEY", required=True),
+        api_version=get_setting("AZURE_OPENAI_API_VERSION", "2025-01-01-preview"),
     )
 
 
 def get_client_nano():
     return AzureOpenAI(
-        azure_endpoint=os.environ.get("AZURE_OPENAI_ENDPOINT_NANO", os.environ["AZURE_OPENAI_ENDPOINT"]),
-        api_key=os.environ.get("AZURE_OPENAI_API_KEY_NANO", os.environ["AZURE_OPENAI_API_KEY"]),
-        api_version=os.environ.get("AZURE_OPENAI_API_VERSION_NANO", os.environ.get("AZURE_OPENAI_API_VERSION", "2025-01-01-preview")),
+        azure_endpoint=get_setting("AZURE_OPENAI_ENDPOINT_NANO", get_setting("AZURE_OPENAI_ENDPOINT", required=True)),
+        api_key=get_setting("AZURE_OPENAI_API_KEY_NANO", get_setting("AZURE_OPENAI_API_KEY", required=True)),
+        api_version=get_setting(
+            "AZURE_OPENAI_API_VERSION_NANO",
+            get_setting("AZURE_OPENAI_API_VERSION", "2025-01-01-preview"),
+        ),
     )
 
 
-MODEL_CHAT = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-4.1")
-MODEL_VALID = os.environ.get("AZURE_OPENAI_DEPLOYMENT_NANO", "gpt-4.1-nano")
+MODEL_CHAT = get_setting("AZURE_OPENAI_DEPLOYMENT", "gpt-4.1")
+MODEL_VALID = get_setting("AZURE_OPENAI_DEPLOYMENT_NANO", "gpt-4.1-nano")
 
 # ──────────────────────────────────────────────────────────
 # Helper: safe OpenAI call with 1 retry
