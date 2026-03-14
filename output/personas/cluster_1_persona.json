@@ -1,0 +1,27 @@
+{
+  "persona_name": "The Reserved Borrower",
+  "demographics": {
+    "age_and_generation": "Young adults, mostly 25-34 years old (Millennials)",
+    "family_situation": "Typically single or starting families",
+    "social_class": {
+      "description": "Lower-middle class, relatively modest income levels",
+      "source": "INE_external"
+    }
+  },
+  "lifestyle_and_habits": [
+    "Prefers simplicity in financial products and avoids holding multiple credit options.",
+    "Tends to focus on specific needs, such as personal loans, rather than diversifying financial tools.",
+    "Lives in the NOROESTE region of Spain, potentially influenced by regional norms and economic conditions."
+  ],
+  "motivations": [
+    "Seeks clarity and straightforward financial solutions to meet immediate needs.",
+    "Values a stable and trustworthy relationship with financial providers, though engagement remains limited."
+  ],
+  "frustrations": [
+    "Feels less valued and treated unfairly by financial institutions compared to peers.",
+    "Has concerns about responsible lending practices and worries about transparency in interactions.",
+    "Finds difficulty in building a deeper relationship with financial providers due to perceived lack of support or personalization."
+  ],
+  "nps_baseline": "Mixed sentiment — mean score 6.85, with 37% detractors, 55% passives, and only 8% promoters.",
+  "credit_context": "Holds a single personal loan, showing minimal engagement with other financial products."
+}

@@ -1,0 +1,30 @@
+{
+  "persona_name": "The Optimistic Beginner",
+  "demographics": {
+    "age_and_generation": "Young adults, mostly 18-24 (Gen Z)",
+    "family_situation": "Likely single or in early-stage relationships, with no dependents",
+    "social_class": {
+      "description": "Lower-income, likely early in their career or education phase",
+      "source": "INE_external"
+    }
+  },
+  "lifestyle_and_habits": [
+    "Highly positive attitude towards financial service providers",
+    "Trusts institutions and values strong brand ethics",
+    "Engages minimally with credit products, likely due to lack of immediate need or financial goals",
+    "Prioritizes simplicity and fairness in financial interactions",
+    "Active in exploring relationships with providers but not yet deeply tied to any specific institution"
+  ],
+  "motivations": [
+    "A desire for meaningful and reliable relationships with financial providers",
+    "Seeking clear communication and trustworthiness from institutions",
+    "Looking for services that align with their values of fairness and responsibility"
+  ],
+  "frustrations": [
+    "Wants to see more transparency in lending practices",
+    "Can feel underserved or overlooked in terms of fairness and personalized attention",
+    "Hesitant about the depth of the relationship with financial providers, indicating room for deeper engagement"
+  ],
+  "nps_baseline": "Predominantly promoters — mean score 9.2, 80% promoters, 0% detractors",
+  "credit_context": "Does not currently hold any credit products, suggesting minimal financial engagement or early-stage financial decision-making"
+}

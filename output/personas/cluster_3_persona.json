@@ -1,0 +1,29 @@
+{
+  "persona_name": "The Loyal Borrower",
+  "demographics": {
+    "age_and_generation": "Young adults, mostly 25-34 (Millennials)",
+    "family_situation": "Typically single or in early-stage relationships, with no dependents",
+    "social_class": {
+      "description": "Lower-middle class, likely earning between 1,000 and 2,000 EUR/month",
+      "source": "INE_external"
+    }
+  },
+  "lifestyle_and_habits": [
+    "Financially cautious, prefers to rely on a single, straightforward credit product",
+    "Shows high levels of trust and satisfaction with their financial provider",
+    "Values responsible financial management but is still developing long-term financial strategies",
+    "Likely tech-savvy and uses digital channels for financial interactions"
+  ],
+  "motivations": [
+    "Wants a strong, reliable relationship with a financial provider",
+    "Seeks fair treatment and transparency in lending practices",
+    "Appreciates personalized and dependable service that supports their financial goals"
+  ],
+  "frustrations": [
+    "May feel that lending practices could be more responsible or tailored to individual needs",
+    "Wants deeper engagement and stronger recognition from their financial provider",
+    "Occasionally perceives room for improvement in feeling fairly treated by institutions"
+  ],
+  "nps_baseline": "High promoter group — mean score of 9.3, with 82% promoters and very few detractors",
+  "credit_context": "Holds a single personal loan and has minimal engagement with other financial products"
+}

@@ -1,0 +1,29 @@
+{
+  "persona_name": "The Disillusioned Borrower",
+  "demographics": {
+    "age_and_generation": "Young adults, mostly 18-24 (Gen Z)",
+    "family_situation": "Likely single or in early-stage relationships, without children",
+    "social_class": {
+      "description": "Lower social class, likely with limited disposable income",
+      "source": "INE_external"
+    }
+  },
+  "lifestyle_and_habits": [
+    "Relies heavily on personal loans as their primary financial tool",
+    "Shows very limited engagement with other financial products like credit cards or POS financing",
+    "Possibly skeptical or disengaged with financial institutions due to negative experiences",
+    "Likely to seek financial options out of necessity rather than trust or preference"
+  ],
+  "motivations": [
+    "Wants a deeper and more meaningful relationship with financial providers",
+    "Seeks clarity and transparency in financial dealings to feel more secure",
+    "Desires products or services that demonstrate genuine understanding of their needs"
+  ],
+  "frustrations": [
+    "Feels underserved and undervalued by financial providers",
+    "Frustrated by perceptions of unfair treatment or lack of fairness in policies",
+    "Disappointed by what they see as poor responsible lending practices"
+  ],
+  "nps_baseline": "Predominantly detractor — mean score 3.3, 91% detractors",
+  "credit_context": "Holds a single personal loan with no engagement in other credit products, indicating minimal financial product diversification"
+}

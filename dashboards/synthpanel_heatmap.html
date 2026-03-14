@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SynthPanel — Product × Persona Fit Matrix</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg:       #08090d;
+  --surface:  #0f1117;
+  --s2:       #161a24;
+  --s3:       #1d2133;
+  --border:   rgba(255,255,255,0.07);
+  --border2:  rgba(255,255,255,0.12);
+  --text:     #f0eef8;
+  --muted:    #5c6080;
+  --dim:      #2e3248;
+
+  --green:    #2ecc8f;
+  --green-bg: rgba(46,204,143,0.10);
+  --green-br: rgba(46,204,143,0.28);
+
+  --amber:    #f0a500;
+  --amber-bg: rgba(240,165,0,0.10);
+  --amber-br: rgba(240,165,0,0.28);
+
+  --red:      #e8445a;
+  --red-bg:   rgba(232,68,90,0.10);
+  --red-br:   rgba(232,68,90,0.28);
+
+  --accent:   #6c7bff;
+
+  --cell-w: 108px;
+  --row-h:   68px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Syne', sans-serif;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* subtle grid bg */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events:none;
+  z-index:0;
+}
+body::after {
+  content:'';
+  position:fixed; inset:0;
+  background:
+    radial-gradient(ellipse 70% 40% at 15% 0%, rgba(108,123,255,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 100%, rgba(46,204,143,0.05) 0%, transparent 60%);
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ── HEADER ─────────────────────────────────────────── */
+header {
+  position: relative; z-index:10;
+  height: 58px;
+  padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: rgba(8,9,13,0.85);
+  backdrop-filter: blur(12px);
+}
+
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px; font-weight: 800; letter-spacing: -0.5px;
+  display: flex; align-items: center; gap: 8px;
+}
+.logo-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+.logo em { color: var(--accent); font-style: normal; }
+
+.header-mid { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+
+.view-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted); padding: 2px 10px;
+  border: 1px solid var(--dim); border-radius: 20px;
+}
+
+.product-tabs {
+  display: flex; gap: 2px;
+  background: var(--s2); border-radius: 7px; padding: 3px;
+  border: 1px solid var(--border);
+}
+.ptab {
+  padding: 4px 11px; border-radius: 5px;
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  border: none; background: transparent; color: var(--muted);
+  font-family: 'Syne', sans-serif; transition: all 0.15s;
+}
+.ptab.active { background: var(--accent); color: white; }
+.ptab:hover:not(.active) { color: var(--text); }
+
+.header-right {
+  display: flex; align-items: center; gap: 10px;
+}
+.hbadge {
+  padding: 3px 9px; border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 500;
+}
+.hb-green { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-br); }
+.hb-red   { background: var(--red-bg);   color: var(--red);   border: 1px solid var(--red-br); }
+.hb-blue  { background: rgba(108,123,255,0.1); color: var(--accent); border: 1px solid rgba(108,123,255,0.25); }
+
+/* ── APP BODY ────────────────────────────────────────── */
+.app {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative; z-index: 1;
+}
+
+/* ── LEFT SIDEBAR ────────────────────────────────────── */
+.sidebar {
+  width: 220px; min-width: 220px;
+  border-right: 1px solid var(--border);
+  padding: 18px 14px;
+  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 20px;
+  background: rgba(15,17,23,0.6);
+}
+
+.sb-title {
+  font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px;
+}
+
+.legend-row { display: flex; align-items: center; gap: 9px; margin-bottom: 6px; font-size: 11px; color: var(--muted); }
+.legend-swatch { width: 24px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+.filter-group { display: flex; flex-direction: column; gap: 4px; }
+.fbtn {
+  padding: 6px 10px; border-radius: 6px;
+  font-family: 'Syne', sans-serif; font-size: 11px; font-weight: 600;
+  cursor: pointer; border: 1px solid transparent;
+  background: transparent; color: var(--muted); text-align: left;
+  transition: all 0.14s;
+}
+.fbtn:hover { background: var(--s2); color: var(--text); }
+.fbtn.active { background: rgba(108,123,255,0.1); border-color: rgba(108,123,255,0.3); color: var(--accent); }
+
+.stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.stat-box {
+  background: var(--s2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 9px 10px;
+}
+.stat-val { font-family: 'JetBrains Mono', monospace; font-size: 19px; font-weight: 500; color: var(--text); }
+.stat-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+.method-box {
+  background: rgba(108,123,255,0.06);
+  border: 1px solid rgba(108,123,255,0.18);
+  border-radius: 7px; padding: 10px 12px;
+  font-size: 10px; color: var(--muted); line-height: 1.6;
+}
+.method-box strong { color: var(--accent); }
+
+.conf-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; font-size: 11px; color: var(--muted); }
+.conf-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── MAIN TABLE AREA ─────────────────────────────────── */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+.main-head {
+  padding: 14px 24px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-end; justify-content: space-between;
+  flex-shrink: 0;
+}
+.main-title {
+  font-family: 'Instrument Serif', serif;
+  font-size: 20px; font-weight: 400; letter-spacing: -0.2px;
+  color: var(--text);
+}
+.main-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+.table-scroll { flex: 1; overflow: auto; padding: 18px 24px 24px; }
+
+/* ── TABLE ───────────────────────────────────────────── */
+table { border-collapse: separate; border-spacing: 5px; }
+
+.corner { width: 210px; min-width: 210px; padding: 6px 4px 14px; vertical-align: bottom; }
+.corner-inner {
+  font-size: 9px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--dim);
+}
+
+/* Product column headers */
+.prod-th { padding: 6px 4px 14px; text-align: center; min-width: var(--cell-w); width: var(--cell-w); vertical-align: bottom; }
+.prod-icon { font-size: 16px; display: block; margin-bottom: 4px; }
+.prod-name { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text); display: block; line-height: 1.3; }
+.prod-usage { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--muted); margin-top: 3px; display: block; }
+
+/* Persona row headers */
+.persona-th { padding: 4px 12px 4px 2px; vertical-align: middle; white-space: nowrap; min-width: 210px; }
+
+.p-cluster-tag {
+  font-size: 8px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase;
+  padding: 2px 6px; border-radius: 3px; display: inline-block; margin-bottom: 4px;
+}
+.tag-det { background: var(--red-bg); color: var(--red); }
+.tag-pas { background: var(--amber-bg); color: var(--amber); }
+.tag-pro { background: var(--green-bg); color: var(--green); }
+
+.p-name { font-size: 12px; font-weight: 700; display: block; line-height: 1.25; color: var(--text); letter-spacing: -0.2px; }
+.p-sub  { font-size: 10px; color: var(--muted); display: block; margin-top: 2px; }
+
+.p-nps-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  margin-top: 4px; padding: 2px 7px; border-radius: 12px;
+  font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 500;
+}
+
+/* NPS mini spark bar */
+.nps-spark { display: flex; height: 3px; border-radius: 2px; overflow: hidden; width: 40px; margin-top: 5px; gap: 1px; }
+.ns-pro { background: var(--green); border-radius: 1px; }
+.ns-pas { background: var(--amber); border-radius: 1px; }
+.ns-det { background: var(--red); border-radius: 1px; }
+
+/* Score cells */
+.cell {
+  width: var(--cell-w); min-width: var(--cell-w);
+  height: var(--row-h); border-radius: 7px;
+  cursor: pointer; vertical-align: middle; position: relative;
+  transition: transform 0.12s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.12s;
+}
+.cell:hover { transform: scale(1.08); z-index: 5; }
+.cell.sel   { transform: scale(1.08); z-index: 5; outline: 2px solid rgba(255,255,255,0.55); outline-offset: 1px; }
+
+.cell-g { background: var(--green-bg); border: 1px solid var(--green-br); }
+.cell-a { background: var(--amber-bg); border: 1px solid var(--amber-br); }
+.cell-r { background: var(--red-bg);   border: 1px solid var(--red-br); }
+
+.cell-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 3px; }
+.cell-score { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 500; line-height: 1; }
+.cell-g .cell-score { color: var(--green); }
+.cell-a .cell-score { color: var(--amber); }
+.cell-r .cell-score { color: var(--red); }
+
+.cell-track { width: 34px; height: 3px; background: rgba(255,255,255,0.06); border-radius: 2px; overflow: hidden; }
+.cell-fill  { height: 100%; border-radius: 2px; }
+.cell-g .cell-fill { background: var(--green); }
+.cell-a .cell-fill { background: var(--amber); }
+.cell-r .cell-fill { background: var(--red); }
+
+/* ── DETAIL PANEL ────────────────────────────────────── */
+.detail {
+  width: 300px; min-width: 300px;
+  border-left: 1px solid var(--border);
+  background: rgba(15,17,23,0.7);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+
+.detail-empty {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px; padding: 32px;
+  color: var(--muted); font-size: 12px; text-align: center;
+}
+.empty-glyph { font-size: 28px; opacity: 0.2; }
+
+.detail-top {
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.d-cluster { font-size: 9px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 5px; }
+.d-persona { font-family: 'Instrument Serif', serif; font-size: 16px; color: var(--text); margin-bottom: 2px; }
+.d-product { font-size: 11px; color: var(--muted); display: flex; align-items: center; gap: 5px; margin-top: 4px; }
+
+.d-score-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px; border-radius: 20px; margin-top: 8px;
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500;
+}
+.dsp-g { background: var(--green-bg); color: var(--green); border: 1px solid var(--green-br); }
+.dsp-a { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-br); }
+.dsp-r { background: var(--red-bg);   color: var(--red);   border: 1px solid var(--red-br); }
+
+.detail-body { flex: 1; overflow-y: auto; padding: 14px 18px; }
+
+.d-section { font-size: 8px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin: 12px 0 6px; }
+.d-section:first-child { margin-top: 0; }
+
+.d-quote {
+  background: var(--s3);
+  border-left: 2px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  padding: 10px 12px; font-size: 12px; line-height: 1.65;
+  color: var(--text); font-style: italic; margin-bottom: 4px;
+}
+
+.d-stat { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; font-size: 11px; color: var(--muted); }
+.d-stat-v { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text); }
+
+/* NPS bar in detail */
+.d-nps-bar { height: 5px; border-radius: 3px; background: var(--dim); overflow: hidden; display: flex; margin-top: 4px; gap: 1px; }
+.d-nps-seg { height: 100%; border-radius: 2px; }
+
+.d-pill-group { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
+.dpill { padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; }
+.dp-g { background: var(--green-bg); color: var(--green); }
+.dp-r { background: var(--red-bg);   color: var(--red); }
+.dp-b { background: rgba(108,123,255,0.1); color: var(--accent); }
+
+.d-conf { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--text); }
+.d-conf-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 2px; }
+
+@keyframes cellIn { from{opacity:0;transform:scale(0.85)} to{opacity:1;transform:scale(1)} }
+.cell { animation: cellIn 0.3s ease both; }
+
+@keyframes slideIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.detail-body > * { animation: slideIn 0.2s ease both; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><div class="logo-dot"></div>Synth<em>Panel</em></div>
+  <div class="header-mid">
+    <div class="view-chip">Product × Persona Fit Matrix</div>
+    <div class="product-tabs">
+      <button class="ptab active" onclick="filterNPS('all',this)">All clusters</button>
+      <button class="ptab" onclick="filterNPS('detractor',this)">Detractors</button>
+      <button class="ptab" onclick="filterNPS('passive',this)">Passives</button>
+      <button class="ptab" onclick="filterNPS('promoter',this)">Promoters</button>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="hbadge hb-blue">n = 1,810</div>
+    <div class="hbadge hb-green">Real survey data</div>
+    <div class="hbadge hb-red">Spain · BNPP PF</div>
+  </div>
+</header>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div>
+      <div class="sb-title">Score Legend</div>
+      <div class="legend-row"><div class="legend-swatch" style="background:var(--green-bg);border:1px solid var(--green-br)"></div>High fit 7–10</div>
+      <div class="legend-row"><div class="legend-swatch" style="background:var(--amber-bg);border:1px solid var(--amber-br)"></div>Medium fit 4–6</div>
+      <div class="legend-row"><div class="legend-swatch" style="background:var(--red-bg);border:1px solid var(--red-br)"></div>Low fit 1–3</div>
+    </div>
+
+    <div>
+      <div class="sb-title">Panel Stats</div>
+      <div class="stat-grid">
+        <div class="stat-box"><div class="stat-val">1,810</div><div class="stat-lbl">Customers</div></div>
+        <div class="stat-box"><div class="stat-val">6</div><div class="stat-lbl">Clusters</div></div>
+        <div class="stat-box"><div class="stat-val" id="st-hi">—</div><div class="stat-lbl">High fit</div></div>
+        <div class="stat-box"><div class="stat-val" id="st-lo">—</div><div class="stat-lbl">Low fit</div></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sb-title">Score Methodology</div>
+      <div class="method-box">
+        <strong>45%</strong> actual product usage rate<br/>
+        <strong>40%</strong> NPS + CSAT satisfaction<br/>
+        <strong>15%</strong> brand trust (Q6/Q7 scores)<br/><br/>
+        All computed from real BNPP PF Spain survey responses.
+      </div>
+    </div>
+
+    <div>
+      <div class="sb-title">Confidence</div>
+      <div class="conf-row"><div class="conf-dot" style="background:var(--green)"></div>Data-backed (survey)</div>
+      <div class="conf-row"><div class="conf-dot" style="background:var(--amber)"></div>Model inference</div>
+      <div class="conf-row"><div class="conf-dot" style="background:var(--red)"></div>Extrapolation</div>
+    </div>
+  </div>
+
+  <!-- MAIN TABLE -->
+  <div class="main">
+    <div class="main-head">
+      <div>
+        <div class="main-title">6 Clusters · 6 Products · 36 Fit Scores</div>
+        <div class="main-sub">Click any cell — persona speaks in first person · scores grounded in real data</div>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table id="matrix"></table>
+    </div>
+  </div>
+
+  <!-- DETAIL PANEL -->
+  <div class="detail" id="detail">
+    <div class="detail-empty">
+      <div class="empty-glyph">◈</div>
+      <div>Select a cell to hear<br/>the persona's voice</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── REAL DATA ──────────────────────────────────────────────────────────────
+
+const PRODUCTS = [
+  { id:'S6r1', name:'Personal\nLoan',       icon:'💳', usage:'51% hold one' },
+  { id:'S6r2', name:'Revolving\nCredit',    icon:'🔄', usage:'46% hold one' },
+  { id:'S6r3', name:'POS\nFinancing',       icon:'🛍️', usage:'20% hold one' },
+  { id:'S6r4', name:'Car\nLoan',            icon:'🚗', usage:'25% hold one' },
+  { id:'S6r5', name:'Debt\nConsolid.',      icon:'📊', usage:'11% hold one' },
+  { id:'S6r6', name:'Car\nLeasing',         icon:'🔑', usage:'11% hold one' },
+];
+
+// Scores computed from real data:
+// 45% normalized usage rate + 40% (NPS+CSAT) sat norm + 15% trust norm
+// Rounded to 1 decimal, scaled 1–10
+const CLUSTERS = [
+  {
+    id: 0,
+    tag: 'CLUSTER 0',
+    persona: 'The Disillusioned Borrower',
+    demo: '18–24 · Gen Z · Lower class · LEVANTE',
+    nps_group: 'detractor',
+    nps_mean: 3.32, csat: 2.69, ces: 3.15,
+    size: 101, size_pct: '5.6%',
+    nps_split: { p:0, pa:9, d:92 },
+    top_feature: 'CSAT / NPS',
+    scores: { S6r1:4.9, S6r2:1.0, S6r3:1.0, S6r4:2.5, S6r5:5.0, S6r6:2.9 },
+    quotes: {
+      S6r1: { text:"I use a personal loan because I have no real alternative. Not because I trust this bank — I don't. But it's the only door that's open to me right now.", pros:['Only accessible product','Covers immediate need'], cons:['Deep distrust (NPS 3.3)','91% detractors','Uses out of necessity'], conf:'green' },
+      S6r2: { text:"Revolving credit? I barely understand the conditions — and nothing about this bank makes me want to find out. I stay away from anything I can't fully control.", pros:[], cons:['Complete distrust','NPS 3.3','No product engagement'], conf:'green' },
+      S6r3: { text:"Point-of-sale financing feels like another trap dressed up as convenience. I avoid it.", pros:[], cons:['Disengaged from institution','Skeptical of all products'], conf:'green' },
+      S6r4: { text:"If I needed a car urgently I might look at a car loan — but I'd read every line twice. I've been burned by financial fine print before.", pros:['Some vehicle need'], cons:['Very low trust','Would require heavy reassurance'], conf:'amber' },
+      S6r5: { text:"Debt consolidation is actually the one thing that might make sense for me. My loans are messy. Whether I'd trust this bank to do it fairly is a different question entirely.", pros:['Multiple debts to manage','Could see value'], cons:['Trust is the critical barrier'], conf:'amber' },
+      S6r6: { text:"Car leasing feels like paying forever for something I never own. Too expensive, too complex for where I am financially.", pros:[], cons:['Limited income','Complexity barrier'], conf:'green' },
+    }
+  },
+  {
+    id: 1,
+    tag: 'CLUSTER 1',
+    persona: 'The Reserved Borrower',
+    demo: '25–64 · Millennials/GenX · Lower-mid · NOROESTE',
+    nps_group: 'passive',
+    nps_mean: 6.85, csat: 6.78, ces: 5.01,
+    size: 372, size_pct: '20.6%',
+    nps_split: { p:31, pa:203, d:138 },
+    top_feature: 'Relationship value',
+    scores: { S6r1:7.2, S6r2:4.5, S6r3:7.1, S6r4:4.4, S6r5:5.4, S6r6:3.8 },
+    quotes: {
+      S6r1: { text:"A personal loan works for me when I have a specific need. I don't diversify — I take one product, use it, and that's it. Simple, clear, no surprises.", pros:['High usage (51%)','Need-specific focus','Largest passive cluster'], cons:['37% detractors','Low relationship depth'], conf:'green' },
+      S6r2: { text:"Revolving credit could spiral out of control. I'd rather know exactly what I owe each month. Flexibility sounds nice until it isn't.", pros:['Some interest observed'], cons:['Prefers simplicity','Afraid of variable debt'], conf:'green' },
+      S6r3: { text:"POS financing for a specific purchase — yes, that's something I understand. If the conditions are clear and simple, I'd go for it.", pros:['24% observed usage','Purchase-need mindset','NOROESTE: practical spending'], cons:['Needs transparent terms'], conf:'green' },
+      S6r4: { text:"A car loan is possible in NOROESTE — public transport isn't great here. But I'd want to understand every condition before signing anything.", pros:['Regional car dependency'], cons:['Cautious approach','23% usage — below avg'], conf:'amber' },
+      S6r5: { text:"Consolidating my debts sounds logical but the process seems complex and I'm not sure the bank will give me a fair deal.", pros:['10% have debt needs'], cons:['Complexity fear','Limited trust'], conf:'amber' },
+      S6r6: { text:"Leasing is too expensive and too abstract for my income level. I'd buy second-hand before I'd ever lease.", pros:[], cons:['Lower income bracket','Prefers simple known products'], conf:'green' },
+    }
+  },
+  {
+    id: 2,
+    tag: 'CLUSTER 2',
+    persona: 'The Skeptical Borrower',
+    demo: '25–44 · Millennials · Lower-mid · ESTE',
+    nps_group: 'passive',
+    nps_mean: 7.07, csat: 7.14, ces: 5.24,
+    size: 350, size_pct: '19.3%',
+    nps_split: { p:34, pa:215, d:101 },
+    top_feature: 'Brand trust (Q6ar4)',
+    scores: { S6r1:8.2, S6r2:4.8, S6r3:6.4, S6r4:6.5, S6r5:7.8, S6r6:5.6 },
+    quotes: {
+      S6r1: { text:"I'd take a personal loan for something specific — a project, a vehicle. But I read every condition twice. I don't trust that the bank always acts in my interest, even when the headline looks good.", pros:['Highest usage (52%)','Project-driven motivation'], cons:['29% detractors','Trust deficit on Q6ar4'], conf:'green' },
+      S6r2: { text:"Revolving credit appeals to me in theory — the flexibility is real. But the risk of losing track of what I owe worries me. I'd need full visibility before touching it.", pros:['44% usage shows some engagement'], cons:['Skeptical of hidden costs','Needs transparency guarantee'], conf:'green' },
+      S6r3: { text:"POS financing for a clear purchase? I've done it before. It works if the conditions are in plain language and there are no nasty surprises.", pros:['21% have used it','Millennial digital purchase comfort'], cons:['Requires clear transparent terms'], conf:'green' },
+      S6r4: { text:"I'm in ESTE — a car is part of life here. A car loan with fixed monthly payments I can track is something I'd seriously consider. But I'd compare every available option.", pros:['27% hold car loan','ESTE region: car needed'], cons:['Would scrutinize every condition'], conf:'green' },
+      S6r5: { text:"Debt consolidation genuinely appeals to me — I hold a personal loan and I'd like to simplify. But trust is the entry ticket. Without it, no deal.", pros:['Personal loan holder — natural fit','Sees simplification value'], cons:['Trust is the primary barrier'], conf:'amber' },
+      S6r6: { text:"I'd consider leasing if it made financial sense compared to buying. I run the numbers carefully. Convenience doesn't override cost for me.", pros:['11% observe leasing','Open to analysis'], cons:['Skeptical decision style','Price-sensitive'], conf:'amber' },
+    }
+  },
+  {
+    id: 3,
+    tag: 'CLUSTER 3',
+    persona: 'The Loyal Borrower',
+    demo: '25–64 · Millennials/Boomers · Lower-mid · NOROESTE',
+    nps_group: 'promoter',
+    nps_mean: 9.29, csat: 9.31, ces: 6.51,
+    size: 291, size_pct: '16.1%',
+    nps_split: { p:239, pa:50, d:2 },
+    top_feature: 'Brand Opinion / NPS',
+    scores: { S6r1:9.3, S6r2:8.3, S6r3:7.4, S6r4:5.9, S6r5:5.9, S6r6:7.0 },
+    quotes: {
+      S6r1: { text:"I trust this bank completely. A personal loan through them? No hesitation. They've been transparent with me, they've treated me fairly — that makes every financial decision easy.", pros:['82% promoters','Very high trust (Q6ar1: 9.9)','51% usage rate'], cons:['Would still expect a fair rate for their loyalty'], conf:'green' },
+      S6r2: { text:"A revolving credit line from a bank I completely trust — yes, I'd activate it. Knowing it's there gives peace of mind. The conditions don't worry me because I know this bank plays fair.", pros:['High trust eliminates hesitation','48% hold revolving credit'], cons:['Would expect favourable rate as loyal customer'], conf:'green' },
+      S6r3: { text:"POS financing from my bank for a specific purchase — absolutely. I'd use it without even comparing alternatives. This bank has earned that.", pros:['Trust removes friction entirely','18% have used POS'], cons:[], conf:'green' },
+      S6r4: { text:"A car loan is something I might need at some point. I'd go straight to this bank rather than any dealership. But it's not my most urgent need right now.", pros:['Would bypass dealer — direct bank trust'], cons:['Age 25-64 broad range — not primary need','21% usage'], conf:'amber' },
+      S6r5: { text:"I don't have multiple debts to consolidate at the moment. But if I did, this is the one institution I'd trust to restructure things fairly.", pros:['Trust enables adoption if need arises'], cons:['Not current need','Low usage (5.5%)'], conf:'amber' },
+      S6r6: { text:"Leasing could make sense as I think about mobility differently. With a bank I trust, the process would be smooth and transparent.", pros:['Trust makes exploration easy','10% engage with leasing'], cons:['Not primary product for this profile'], conf:'amber' },
+    }
+  },
+  {
+    id: 4,
+    tag: 'CLUSTER 4',
+    persona: 'The Loyal Cardholder',
+    demo: '30s · Millennials · Middle class · NORESTE · Female',
+    nps_group: 'promoter',
+    nps_mean: 8.53, csat: 8.62, ces: 6.04,
+    size: 330, size_pct: '18.2%',
+    nps_split: { p:163, pa:156, d:11 },
+    top_feature: 'ESG / Relationship value',
+    scores: { S6r1:5.3, S6r2:9.4, S6r3:6.5, S6r4:6.6, S6r5:7.6, S6r6:7.9 },
+    quotes: {
+      S6r1: { text:"I prefer my credit card for everyday flexibility. A personal loan feels like too heavy a commitment unless I have a very specific purpose — which I currently don't.", pros:['Good satisfaction (NPS 8.5)','Would engage for specific project'], cons:['Primary product is credit card','Usage 46% — below average'], conf:'green' },
+      S6r2: { text:"My credit card is how I manage my financial life. I trust this bank, I use it constantly, and I'd welcome a higher credit limit without a second thought. It fits exactly how I spend.", pros:['Highest revolving usage (52%)','Female 30s profile','49% promoters','High NPS 8.5'], cons:['Would expect competitive rate'], conf:'green' },
+      S6r3: { text:"POS financing for a specific purchase, sure — I'm comfortable with that kind of short-term commitment. It's predictable and I stay in control.", pros:['Credit-flexible profile','17% POS usage'], cons:['Credit card already covers most of this'], conf:'amber' },
+      S6r4: { text:"I'm in my 30s, a car matters for my lifestyle. I'd look at a car loan from this bank before anywhere else. I like knowing who I'm dealing with.", pros:['Age 31.7 avg','24% hold car loans','High satisfaction'], cons:['Not the primary product for this cluster'], conf:'amber' },
+      S6r5: { text:"If I end up juggling multiple products, debt consolidation becomes interesting. I trust this bank enough to hand them that restructuring responsibility.", pros:['Multiple product engagement','Trust enables this'], cons:['May not hold enough products yet'], conf:'green' },
+      S6r6: { text:"Car leasing appeals to me — I value the monthly predictability and not having to worry about the car's depreciation. With this bank, I'd feel safe exploring it.", pros:['Highest leasing usage (13%)','Convenience-driven mindset','Trust fully established'], cons:[], conf:'green' },
+    }
+  },
+  {
+    id: 5,
+    tag: 'CLUSTER 5',
+    persona: 'The Optimistic Beginner',
+    demo: '25–54 · Gen Z/Millennial · Lower-income · ESTE',
+    nps_group: 'promoter',
+    nps_mean: 9.24, csat: 9.32, ces: 6.47,
+    size: 366, size_pct: '20.2%',
+    nps_split: { p:292, pa:74, d:0 },
+    top_feature: 'Brand Opinion / Responsible banking',
+    scores: { S6r1:7.4, S6r2:7.4, S6r3:10.0, S6r4:10.0, S6r5:7.1, S6r6:10.0 },
+    quotes: {
+      S6r1: { text:"I'm building my financial life right now and a personal loan for something real — a vehicle, a project — is something I'd take with a bank that's been completely honest with me. And this one has.", pros:['Very high NPS 9.2','0% detractors','Future high-value customer'], cons:['Low income constraints','Early financial stage'], conf:'amber' },
+      S6r2: { text:"A revolving line would be useful as I grow financially. I trust this bank and I'd explore it if offered — I'm open and I'm not scared of credit when the institution is trustworthy.", pros:['High trust baseline','Open to all products','0% detractors'], cons:['No current credit engagement','Needs careful onboarding'], conf:'amber' },
+      S6r3: { text:"POS financing at checkout — yes, absolutely. I'm in ESTE, I shop, I have things I need. This is the product that fits my life right now perfectly. Fast, digital, simple.", pros:['Highest POS usage (27%)','Gen Z digital-native','Active buyer profile'], cons:[], conf:'green' },
+      S6r4: { text:"A vehicle is my number one financial goal. I want to finance it through a bank I already love — and I love this one. The process just needs to be digital, fast and transparent.", pros:['Highest car loan rate (30%)','New vehicle = top stated loan purpose','Enthusiastic profile'], cons:['Income constraints'], conf:'green' },
+      S6r5: { text:"I don't have debts to consolidate yet — I'm just starting out. But as my financial life grows I'd naturally come back to this bank for it.", pros:['Long-term relationship potential','High NPS ensures future retention'], cons:['No current need','Too early in journey'], conf:'amber' },
+      S6r6: { text:"Car leasing is the future for people like me — I want mobility without the commitment of owning an asset. Digital, flexible, from a bank I completely trust. Perfect fit.", pros:['Highest leasing usage (16%)','Gen Z: access over ownership','Fully promoter-adjacent'], cons:[], conf:'green' },
+    }
+  },
+];
+
+// ─── STATE ──────────────────────────────────────────────────────────────────
+let selectedCell = null;
+
+// ─── HELPERS ────────────────────────────────────────────────────────────────
+function colorClass(s) { return s >= 7 ? 'cell-g' : s >= 4 ? 'cell-a' : 'cell-r'; }
+function pillClass(s)  { return s >= 7 ? 'dsp-g'  : s >= 4 ? 'dsp-a'  : 'dsp-r';  }
+function label(s)      { return s >= 7 ? '● High fit' : s >= 4 ? '● Medium fit' : '● Low fit'; }
+function npsTagClass(g){ return g==='detractor' ? 'tag-det' : g==='passive' ? 'tag-pas' : 'tag-pro'; }
+function confColor(c)  { return c==='green' ? 'var(--green)' : c==='amber' ? 'var(--amber)' : 'var(--red)'; }
+function confLabel(c)  { return c==='green' ? 'Data-backed (survey)' : c==='amber' ? 'Model inference' : 'Extrapolation'; }
+function npsColor(g)   { return g==='detractor' ? 'var(--red)' : g==='passive' ? 'var(--amber)' : 'var(--green)'; }
+
+// ─── BUILD TABLE ─────────────────────────────────────────────────────────────
+function buildTable() {
+  const tbl = document.getElementById('matrix');
+  tbl.innerHTML = '';
+
+  // Header row
+  const thead = tbl.createTHead();
+  const hr = thead.insertRow();
+
+  const corner = document.createElement('th');
+  corner.className = 'corner';
+  corner.innerHTML = '<div class="corner-inner">Cluster · Product →</div>';
+  hr.appendChild(corner);
+
+  PRODUCTS.forEach(p => {
+    const th = document.createElement('th');
+    th.className = 'prod-th';
+    th.innerHTML = `<span class="prod-icon">${p.icon}</span><span class="prod-name">${p.name.replace('\n','<br/>')}</span><span class="prod-usage">${p.usage}</span>`;
+    hr.appendChild(th);
+  });
+
+  // Body rows
+  const tbody = tbl.createTBody();
+  CLUSTERS.forEach((cl, ci) => {
+    const tr = tbody.insertRow();
+    tr.dataset.group = cl.nps_group;
+
+    const nTotal = cl.nps_split.p + cl.nps_split.pa + cl.nps_split.d;
+    const pPct = Math.round(cl.nps_split.p  / nTotal * 100);
+    const paPct= Math.round(cl.nps_split.pa / nTotal * 100);
+    const dPct = Math.round(cl.nps_split.d  / nTotal * 100);
+
+    // Persona header cell
+    const th = document.createElement('th');
+    th.className = 'persona-th';
+    th.innerHTML = `
+      <span class="p-cluster-tag ${npsTagClass(cl.nps_group)}">${cl.tag}</span>
+      <span class="p-name">${cl.persona}</span>
+      <span class="p-sub">${cl.demo}</span>
+      <span class="p-nps-badge" style="background:${npsColor(cl.nps_group)}18;color:${npsColor(cl.nps_group)}">
+        NPS ${cl.nps_mean} · n=${cl.size}
+      </span>
+      <div class="nps-spark">
+        <div class="ns-pro" style="width:${pPct}%"></div>
+        <div class="ns-pas" style="width:${paPct}%"></div>
+        <div class="ns-det" style="width:${dPct}%"></div>
+      </div>`;
+    tr.appendChild(th);
+
+    // Score cells
+    PRODUCTS.forEach((p, pi) => {
+      const score = cl.scores[p.id];
+      const td = document.createElement('td');
+      td.className = `cell ${colorClass(score)}`;
+      td.style.animationDelay = `${(ci * PRODUCTS.length + pi) * 0.018}s`;
+      td.innerHTML = `<div class="cell-inner">
+        <span class="cell-score">${score}</span>
+        <div class="cell-track"><div class="cell-fill" style="width:${score*10}%"></div></div>
+      </div>`;
+      td.addEventListener('click', () => showDetail(cl, p, score, td));
+      tr.appendChild(td);
+    });
+  });
+
+  updateStats();
+}
+
+// ─── DETAIL PANEL ────────────────────────────────────────────────────────────
+function showDetail(cl, p, score, td) {
+  if (selectedCell) selectedCell.classList.remove('sel');
+  selectedCell = td;
+  td.classList.add('sel');
+
+  const q = cl.quotes[p.id];
+  const nTotal = cl.nps_split.p + cl.nps_split.pa + cl.nps_split.d;
+  const pPct  = Math.round(cl.nps_split.p  / nTotal * 100);
+  const paPct = Math.round(cl.nps_split.pa / nTotal * 100);
+  const dPct  = Math.round(cl.nps_split.d  / nTotal * 100);
+
+  const pros = q.pros.map(x=>`<span class="dpill dp-g">${x}</span>`).join('');
+  const cons = q.cons.map(x=>`<span class="dpill dp-r">${x}</span>`).join('');
+
+  document.getElementById('detail').innerHTML = `
+    <div class="detail-top">
+      <div class="d-cluster" style="color:${npsColor(cl.nps_group)}">${cl.tag} · ${cl.persona}</div>
+      <div class="d-product">${p.icon} ${p.name.replace('\n',' ')}</div>
+      <div class="d-score-pill ${pillClass(score)}">${label(score)} · ${score}/10</div>
+    </div>
+    <div class="detail-body">
+      <div class="d-section">Persona says</div>
+      <div class="d-quote">"${q.text}"</div>
+
+      <div class="d-section">Cluster snapshot</div>
+      <div class="d-stat"><span>NPS mean</span><span class="d-stat-v">${cl.nps_mean}</span></div>
+      <div class="d-stat"><span>CSAT mean</span><span class="d-stat-v">${cl.csat}</span></div>
+      <div class="d-stat"><span>CES mean</span><span class="d-stat-v">${cl.ces}</span></div>
+      <div class="d-stat"><span>Size</span><span class="d-stat-v">${cl.size} (${cl.size_pct})</span></div>
+      <div class="d-stat"><span>Key driver</span><span class="d-stat-v" style="font-family:'Syne',sans-serif;font-size:10px">${cl.top_feature}</span></div>
+      <div class="d-nps-bar" style="margin-top:6px">
+        <div class="d-nps-seg" style="width:${pPct}%;background:var(--green)"></div>
+        <div class="d-nps-seg" style="width:${paPct}%;background:var(--amber)"></div>
+        <div class="d-nps-seg" style="width:${dPct}%;background:var(--red)"></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:4px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">
+        <span style="color:var(--green)">${pPct}% promo</span>
+        <span style="color:var(--amber)">${paPct}% pass</span>
+        <span style="color:var(--red)">${dPct}% detr</span>
+      </div>
+
+      ${pros ? `<div class="d-section">Why they'd take it</div><div class="d-pill-group">${pros}</div>` : ''}
+      ${cons ? `<div class="d-section">What holds them back</div><div class="d-pill-group">${cons}</div>` : ''}
+
+      <div class="d-section">Confidence</div>
+      <div class="d-conf">
+        <div class="d-conf-dot" style="background:${confColor(q.conf)}"></div>
+        <span>${confLabel(q.conf)}</span>
+      </div>
+    </div>`;
+}
+
+// ─── FILTER ──────────────────────────────────────────────────────────────────
+function filterNPS(group, btn) {
+  document.querySelectorAll('.ptab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#matrix tbody tr').forEach(tr => {
+    tr.style.display = (group === 'all' || tr.dataset.group === group) ? '' : 'none';
+  });
+}
+
+// ─── STATS ───────────────────────────────────────────────────────────────────
+function updateStats() {
+  let hi = 0, lo = 0;
+  CLUSTERS.forEach(cl => PRODUCTS.forEach(p => {
+    const s = cl.scores[p.id];
+    if (s >= 7) hi++;
+    if (s <= 3) lo++;
+  }));
+  document.getElementById('st-hi').textContent = hi;
+  document.getElementById('st-lo').textContent = lo;
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+buildTable();
+</script>
+</body>
+</html>

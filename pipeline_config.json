@@ -1,0 +1,106 @@
+{
+  "data": {
+    "input_path": "data/Dataset.csv",
+    "output_dir": "v2/output",
+    "target_feature_count": 45,
+    "credit_holder_values": [4, 5],
+    "non_credit_holder_values": [2],
+    "split_column": "dRecodeCredit"
+  },
+  "features": {
+    "numeric_columns": [
+      "NPS", "CSAT", "CES", "Brand-Opinion", "Q7b",
+      "Q6ar1", "Q6ar2", "Q6ar3", "Q6ar4",
+      "Q6br1", "Q6br2", "Q6br3", "Q6br4", "Q6br5", "Q6br6",
+      "Q7r1", "Q7r2", "Q7r3",
+      "Q8r1", "Q8r2", "Q8r3", "Q8r4", "Q8r5"
+    ],
+    "categorical_columns": [
+      "S2", "S6r1", "S6r2", "S6r3", "S6r4", "S6r5", "S6r6",
+      "S10", "dCreditProvider"
+    ],
+    "ordinal_columns": ["dAge", "dS5ESP", "dRecodeCredit"],
+    "recode_rules": {
+      "subtract_1": [
+        "Q6ar1", "Q6ar2", "Q6ar3", "Q6ar4",
+        "Q6br1", "Q6br2", "Q6br3", "Q6br4", "Q6br5", "Q6br6",
+        "Q7r1", "Q7r2", "Q7r3"
+      ],
+      "dont_know_to_nan": {
+        "columns": ["Q6ar1", "Q6ar2", "Q6ar3", "Q6ar4"],
+        "value": 12
+      }
+    },
+    "ordinal_orders": {
+      "dAge": [2, 3, 4, 5, 6, 7],
+      "dS5ESP": [1, 2, 3, 4, 5, 6, 7],
+      "dRecodeCredit": [4, 5]
+    },
+    "composite_definitions": {
+      "brand_trust": ["Q6ar1", "Q6ar3", "Q6ar4"],
+      "responsible_banking": ["Q6ar2", "Q6br1", "Q6br2", "Q6br3", "Q6br4"],
+      "data_privacy": ["Q6br5", "Q6br6"],
+      "relationship_value": ["Q7r1", "Q7r2", "Q7r3"],
+      "customer_experience": ["Q8r1", "Q8r2", "Q8r3", "Q8r4", "Q8r5"]
+    },
+    "correlation_threshold": 0.85,
+    "missing_fill_value": 0
+  },
+  "clustering": {
+    "k_min": 5,
+    "k_max": 15,
+    "umap_n_components": 5,
+    "umap_n_neighbors": 15,
+    "umap_min_dist": 0.1,
+    "umap_random_state": 42,
+    "hdbscan_min_cluster_size": 50,
+    "random_state": 42
+  },
+  "persona_generation": {
+    "azure_openai_deployment": "gpt-4.1",
+    "api_version": "2024-12-01-preview",
+    "persona_schema_version": "1.0",
+    "output_dir": "v2/output/personas",
+    "system_instruction": "You are a market research expert creating detailed customer personas for BNPP Personal Finance Spain. You will receive cluster statistics including z-scores, NPS distributions and categorical modes as INPUT context. Your job is to TRANSLATE all statistical values into plain-language behavioral descriptors. The output persona must contain NO z-scores, NO index numbers, NO raw statistics — only human-readable descriptions. Fields requiring external anchoring (social_class) must include '\"source\": \"INE_external\"' as a data lineage marker.",
+    "persona_fields": [
+      "persona_name",
+      "demographics",
+      "lifestyle_and_habits",
+      "motivations",
+      "frustrations",
+      "nps_baseline",
+      "credit_context"
+    ]
+  },
+  "column_labels": {
+    "dAge": {
+      "2": "18-24", "3": "25-34", "4": "35-44",
+      "5": "45-54", "6": "55-64", "7": "65+"
+    },
+    "dS5ESP": {
+      "1": "NOROESTE", "2": "NORESTE", "3": "MADRID",
+      "4": "CENTRO", "5": "ESTE", "6": "SUR", "7": "ISLAS CANARIAS"
+    },
+    "dRecodeCredit": {
+      "2": "No credit holder", "4": "Mono credit holder", "5": "Multi credit holder"
+    },
+    "dCreditProvider": {
+      "1": "BANK", "2": "CREDIT SPECIALIST", "3": "RETAILER CREDIT CARD",
+      "4": "AUTO CAPTIVE", "5": "AUTO BANK"
+    },
+    "S10": {
+      "1": "Finance new vehicle", "2": "Finance used vehicle",
+      "3": "Finance a purchase", "4": "Finance a project",
+      "5": "Home renovation", "6": "Financial difficulties", "7": "Other"
+    },
+    "S2": {
+      "1": "Male", "2": "Female"
+    },
+    "S6r1": "Personal loan",
+    "S6r2": "Credit card / Credit line",
+    "S6r3": "POS financing",
+    "S6r4": "POS car loan",
+    "S6r5": "Debt consolidation",
+    "S6r6": "Car leasing"
+  }
+}

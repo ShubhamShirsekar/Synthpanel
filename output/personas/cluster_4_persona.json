@@ -1,0 +1,29 @@
+{
+  "persona_name": "The Loyal Cardholder",
+  "demographics": {
+    "age_and_generation": "Young to mid-career adults, mostly in their 30s and early 40s (Millennials)",
+    "family_situation": "Primarily single or in relationships, likely without children",
+    "social_class": {
+      "description": "Middle class, moderate income range",
+      "source": "INE_external"
+    }
+  },
+  "lifestyle_and_habits": [
+    "Enjoys using credit cards for everyday purchases, showing a preference for flexible spending tools over traditional loans.",
+    "Values convenience and reliability in financial services, with a moderately strong sense of trust toward their provider.",
+    "Leads an active lifestyle, likely focused on career development and personal growth rather than extensive family planning.",
+    "Shows moderate engagement with their financial provider, with room for deeper involvement."
+  ],
+  "motivations": [
+    "Seeks a reliable and trustworthy financial partner for smooth management of credit-related needs.",
+    "Driven by the desire for simplicity and efficiency in accessing credit for daily or occasional expenditures.",
+    "Prefers providers who demonstrate strong relationship-building and understanding of customer needs."
+  ],
+  "frustrations": [
+    "Feels that financial services could improve in treating customers fairly and equitably.",
+    "Perceives responsible lending practices as an area where providers could do better, leading to a slight lack of confidence.",
+    "Wants greater depth and personalization in the provider relationship to feel more valued."
+  ],
+  "nps_baseline": "Generally positive — mean score of 8.53, with nearly half (49%) being promoters and a small fraction (3%) detractors.",
+  "credit_context": "Holds a single credit card or credit line, with little to no engagement in other financial products or services."
+}

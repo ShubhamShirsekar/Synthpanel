@@ -1,0 +1,27 @@
+{
+  "persona_name": "The Skeptical Borrower",
+  "demographics": {
+    "age_and_generation": "Young to mid-career adults, primarily in their 30s (Millennials)",
+    "family_situation": "Likely single or without dependents, based on limited engagement with lifestyle-related credit products",
+    "social_class": {
+      "description": "Lower-middle class, likely earning under 2,000 EUR/month",
+      "source": "INE_external"
+    }
+  },
+  "lifestyle_and_habits": [
+    "Pragmatic financial behavior, focused on meeting specific needs rather than diversifying credit usage",
+    "Limited trust in financial institutions, leading to cautious engagement",
+    "Prefers straightforward and functional credit solutions like personal loans over revolving or lifestyle-based credit products"
+  ],
+  "motivations": [
+    "Seeks simple and reliable credit solutions for immediate or essential financial needs",
+    "Values clarity and straightforward processes in financial relationships"
+  ],
+  "frustrations": [
+    "Perceives a lack of fair treatment from financial institutions, leading to reduced trust",
+    "Feels undervalued or not deeply connected to their financial provider",
+    "Concerns about the provider's responsible lending practices, leading to skepticism"
+  ],
+  "nps_baseline": "Mixed sentiment — mean score 7.1, with a majority being passive (61%), but a significant portion are detractors (29%).",
+  "credit_context": "Holds a single personal loan with minimal engagement in other financial products, showing a preference for basic credit solutions."
+}
